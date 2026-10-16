@@ -1,0 +1,140 @@
+.marqueeViewport {
+  overflow: hidden;
+  margin: -0.5rem -0.25rem;
+  padding: 0.5rem 0.25rem;
+}
+
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  animation: category-marquee 38s linear infinite;
+}
+
+.categoryGroup {
+  display: flex;
+  flex: none;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0 0.75rem 0 0;
+  list-style: none;
+}
+
+.categoryItem {
+  flex: none;
+  width: clamp(13rem, 27vw, 17rem);
+}
+
+.categoryCard {
+  position: relative;
+  display: block;
+  aspect-ratio: 1.2;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--c-paper) 24%, transparent);
+  border-radius: 1.25rem;
+  background: var(--c-espresso);
+  color: var(--c-espresso);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--c-espresso) 20%, transparent);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.categoryCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--c-espresso) 28%, transparent);
+}
+
+.categoryCard:focus-visible {
+  outline: 3px solid var(--c-caramel);
+  outline-offset: 3px;
+}
+
+.categoryImage {
+  object-fit: cover;
+  transition: transform 300ms ease;
+}
+
+.categoryCard::after {
+  position: absolute;
+  inset: 30% 0 0;
+  background: linear-gradient(transparent, rgb(25 28 25 / 82%));
+  content: "";
+  pointer-events: none;
+}
+
+.categoryCard:hover .categoryImage {
+  transform: scale(1.05);
+}
+
+.categoryDetails {
+  position: absolute;
+  z-index: 1;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--c-paper);
+}
+
+.categoryLabel {
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-shadow: 0 1px 4px rgb(0 0 0 / 30%);
+}
+
+.cardArrow {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--c-caramel);
+  color: var(--c-paper);
+  transition: transform 180ms ease;
+}
+
+.categoryCard:hover .cardArrow {
+  transform: translateX(3px);
+}
+
+.marqueeViewport:hover .marqueeTrack,
+.marqueeViewport:focus-within .marqueeTrack {
+  animation-play-state: paused;
+}
+
+@keyframes category-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marqueeViewport {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .marqueeTrack {
+    animation: none;
+  }
+
+  .categoryGroup[aria-hidden="true"] {
+    display: none;
+  }
+
+  .categoryCard,
+  .categoryImage,
+  .cardArrow {
+    transition: none;
+  }
+}
