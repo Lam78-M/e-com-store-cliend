@@ -26,17 +26,17 @@ export default function HomeHero() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
-              href="/menu"
+              href="#categories"
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--c-caramel)] px-5 py-3 font-bold text-[var(--c-paper)] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--c-paper)]"
             >
-              Explore the menu
+              Browse categories
               <ArrowRight size={18} aria-hidden="true" />
             </Link>
             <Link
-              href="/offers"
+              href="#school-hours"
               className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--c-paper)]/20 px-5 py-3 font-semibold text-[var(--c-paper)] transition hover:bg-[var(--c-paper)]/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--c-paper)]"
             >
-              See today’s offers
+              School hours
             </Link>
           </div>
 

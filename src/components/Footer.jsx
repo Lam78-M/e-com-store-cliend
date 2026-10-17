@@ -3,18 +3,16 @@ import { Banknote, Clock, MapPin, Phone, UtensilsCrossed } from "lucide-react";
 
 const QUICK_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/menu", label: "Menu" },
-  { href: "/offers", label: "Offers" },
-  { href: "/orders", label: "My Orders" },
-  { href: "/cart", label: "Cart" },
+  { href: "#categories", label: "Categories" },
+  { href: "#school-hours", label: "School hours" },
 ];
 
 const CATEGORIES = [
-  { href: "/menu?category=chips", label: "Chips" },
-  { href: "/menu?category=biscuit", label: "Biscuit" },
-  { href: "/menu?category=chocolate", label: "Chocolate" },
-  { href: "/menu?category=ice-cream", label: "Ice Cream" },
-  { href: "/menu?category=drinks", label: "Drinks" },
+  "Chips",
+  "Biscuit",
+  "Chocolate",
+  "Ice Cream",
+  "Drinks",
 ];
 
 const INFO = [
@@ -66,11 +64,9 @@ export default function Footer() {
         <nav aria-label="Categories" className="col-span-1">
           <h3 className="mb-3 font-bold">Categories</h3>
           <ul className="text-sm">
-            {CATEGORIES.map(({ href, label }) => (
-              <li key={label}>
-                <Link href={href} className={linkClass}>
-                  {label}
-                </Link>
+            {CATEGORIES.map((category) => (
+              <li key={category}>
+                <span className="inline-block py-1 opacity-80">{category}</span>
               </li>
             ))}
           </ul>

@@ -1,287 +1,226 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
-import { AnimatePresence, motion } from "framer-motion";
-import toast from "react-hot-toast";
-import {
-  Home,
-  LayoutDashboard,
-  Menu as MenuIcon,
-  Moon,
-  Package,
-  Search,
-  ShoppingCart,
-  Sun,
-  Tag,
-  User,
-  UtensilsCrossed,
-  X,
-} from "lucide-react";
+import { useState } from "react";
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { LogOut, Menu, Store, X } from "lucide-react";
+import { signOut, useSession } from "@/lib/auth-client";
+import { showAuthError, showAuthSuccess } from "@/lib/auth-toast";
 
 const LINKS = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/menu", label: "Menu", icon: UtensilsCrossed },
-  { href: "/offers", label: "Offers", icon: Tag },
-  { href: "/orders", label: "My Orders", icon: Package },
-  { href: "/admin", label: "Admin", icon: LayoutDashboard },
+  { href: "/", label: "Home" },
+  { href: "/", label: "All Products" },
+  { href: "/#categories", label: "Categories" },
+  { href: "/", label: "My Orders" },
 ];
 
+const linkClass =
+  "rounded-lg px-3 py-2 text-sm font-semibold text-[var(--c-espresso)] transition-colors hover:bg-[var(--c-caramel)]/10 hover:text-[var(--c-teal)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-caramel)] focus-visible:ring-offset-2";
+
 export default function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const { data: session, isPending } = useSession();
   const pathname = usePathname();
-  const { resolvedTheme, setTheme } = useTheme();
-
-  const [mounted, setMounted] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-
-  // TODO: cart store (Zustand/Context) theke ashbe
-  const cartCount = 3;
-  // TODO: NextAuth session theke ashbe. Login thakle { name: "Rahim" }
-  const user = null;
-
-  useEffect(() => setMounted(true), []);
+  const router = useRouter();
+  const user = session?.user;
+  const navigationLinks =
+    user?.role === "admin"
+      ? [{ href: "/dashboard", label: "Dashboard" }, ...LINKS]
+      : LINKS;
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    if (pathname !== "/" || isPending) return;
 
-  // route change hole drawer bondho
-  useEffect(() => setDrawerOpen(false), [pathname]);
+    const authFlow = new URLSearchParams(window.location.search).get("auth");
+    if (!authFlow) return;
 
-  const isActive = (href) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+    window.history.replaceState(null, "", "/");
+    if (!user) return;
 
-  const toggleTheme = () =>
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+    if (authFlow === "google-login") {
+      showAuthSuccess(`Welcome back, ${user.name || "friend"}!`);
+    } else if (authFlow === "google-register") {
+      showAuthSuccess(
+        `Your account is ready, ${user.name || "friend"}! Welcome to School Canteen.`,
+      );
+    }
+  }, [isPending, pathname, user]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const q = new FormData(e.currentTarget).get("q")?.toString().trim();
-    if (!q) return toast.error("Kichu likhe search koro");
-    window.location.href = `/menu?search=${encodeURIComponent(q)}`;
-  };
+  async function handleLogout() {
+    setLoggingOut(true);
+    try {
+      const result = await signOut();
+      if (result?.error) {
+        showAuthError(result.error.message || "Unable to sign out. Please try again.");
+        return;
+      }
+
+      showAuthSuccess("You’re signed out. See you next break!");
+      setMenuOpen(false);
+      router.replace("/");
+      router.refresh();
+    } catch {
+      showAuthError("Unable to sign out. Please try again.");
+    } finally {
+      setLoggingOut(false);
+    }
+  }
 
   return (
-    <>
-      {/* ============ TOP BAR ============ */}
-      <header
-        className={`sticky top-0 z-50 bg-[var(--c-cream)] text-[var(--c-espresso)] border-b border-[var(--c-espresso)]/10 transition-shadow ${
-          scrolled ? "shadow-lg" : ""
-        }`}
+    <header className="sticky top-0 z-50 border-b border-[var(--c-espresso)]/10 bg-[var(--c-cream)] shadow-sm">
+      <nav
+        aria-label="Main navigation"
+        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
       >
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          {/* Logo (pore bodlabe) */}
-          <Link href="/" className="flex items-center gap-2" aria-label="Home">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-[var(--c-caramel)] text-[var(--c-cream)]">
-              <UtensilsCrossed size={20} />
+        <div className="flex min-h-[76px] items-center justify-between gap-3">
+          <Link
+            href="/"
+            className="flex min-w-0 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-caramel)] focus-visible:ring-offset-2"
+            aria-label="School Canteen home"
+          >
+            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#176B55] text-white shadow-sm">
+              <Store size={22} strokeWidth={2} aria-hidden="true" />
             </span>
-            <span className="text-lg font-extrabold leading-none">
-              School Canteen
+            <span className="min-w-0">
+              <span className="block truncate text-base font-extrabold leading-tight tracking-tight text-[var(--c-espresso)] sm:text-lg">
+                School Canteen
+              </span>
+              <span className="mt-1 block text-xs font-medium text-[var(--c-teal)]/75 sm:text-sm">
+                Fresh snacks, happy breaks!
+              </span>
             </span>
           </Link>
 
-          {/* Desktop links */}
-          <ul className="hidden items-center gap-1 md:flex">
-            {LINKS.map(({ href, label }) => (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className="relative px-3 py-2 text-sm font-semibold"
-                >
-                  {label}
-                  {isActive(href) && (
-                    <motion.span
-                      layoutId="nav-underline"
-                      className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded bg-[var(--c-caramel)]"
-                    />
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="flex shrink-0 items-center gap-2">
+            <ul className="hidden items-center gap-1 lg:flex">
+              {navigationLinks.map(({ href, label }) => (
+                <li key={label}>
+                  <Link
+                    href={href}
+                    className={linkClass}
+                    aria-current={
+                      (href === "/" && pathname === "/") ||
+                      (href === "/dashboard" && pathname.startsWith("/dashboard"))
+                        ? "page"
+                        : undefined
+                    }
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-1">
-            {/* Search */}
-            <button
-              onClick={() => setSearchOpen((v) => !v)}
-              className="rounded-full p-2 hover:bg-[var(--c-espresso)]/10"
-              aria-label="Search"
-            >
-              <Search size={20} />
-            </button>
-
-            {/* Theme */}
-            <button
-              onClick={toggleTheme}
-              className="rounded-full p-2 hover:bg-[var(--c-espresso)]/10"
-              aria-label="Toggle theme"
-            >
-              {mounted && resolvedTheme === "dark" ? (
-                <Sun size={20} />
-              ) : (
-                <Moon size={20} />
-              )}
-            </button>
-
-            {/* Cart */}
-            <Link
-              href="/cart"
-              className="relative rounded-full p-2 hover:bg-[var(--c-espresso)]/10"
-              aria-label={`Cart, ${cartCount} items`}
-            >
-              <ShoppingCart size={20} />
-              {cartCount > 0 && (
-                <motion.span
-                  key={cartCount}
-                  initial={{ scale: 0.4 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 12 }}
-                  className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--c-caramel)] px-1 text-[11px] font-bold text-[var(--c-espresso)]"
-                >
-                  {cartCount}
-                </motion.span>
-              )}
-            </Link>
-
-            {/* Login / Profile (desktop) */}
             {user ? (
-              <Link
-                href="/profile"
-                className="ml-1 hidden items-center gap-2 rounded-full bg-[var(--c-espresso)] px-3 py-1.5 text-sm font-bold text-[var(--c-cream)] md:flex"
-              >
-                <User size={16} /> {user.name}
-              </Link>
+              <div className="hidden items-center gap-2 lg:flex">
+                <div
+                  className="flex min-w-0 items-center gap-2 rounded-xl border border-[var(--c-caramel)]/25 bg-white/70 py-1.5 pl-1.5 pr-3 shadow-sm"
+                  title={user.name || user.email}
+                >
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[var(--c-teal)] text-sm font-extrabold uppercase text-[var(--c-paper)]">
+                    {(user.name || user.email || "U").charAt(0)}
+                  </span>
+                  <span className="max-w-16 truncate text-xs font-bold text-[var(--c-espresso)] sm:max-w-28 sm:text-sm">
+                    {user.name || user.email}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  aria-label="Log out"
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[var(--c-teal)] px-3 text-sm font-bold text-[var(--c-paper)] shadow-sm transition-colors hover:bg-[var(--c-espresso)] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-caramel)] focus-visible:ring-offset-2 sm:px-4"
+                >
+                  <LogOut size={16} aria-hidden="true" />
+                  <span className="hidden sm:inline">
+                    {loggingOut ? "Signing out..." : "Log out"}
+                  </span>
+                </button>
+              </div>
             ) : (
               <Link
                 href="/login"
-                className="ml-1 hidden rounded-full bg-[var(--c-espresso)] px-4 py-1.5 text-sm font-bold text-[var(--c-cream)] md:block"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--c-teal)] px-5 text-sm font-bold text-[var(--c-paper)] shadow-sm transition-colors hover:bg-[var(--c-espresso)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-caramel)] focus-visible:ring-offset-2"
               >
                 Login
               </Link>
             )}
 
-            {/* Hamburger (mobile) */}
             <button
-              onClick={() => setDrawerOpen(true)}
-              className="rounded-full p-2 hover:bg-[var(--c-espresso)]/10 md:hidden"
-              aria-label="Open menu"
+              type="button"
+              className="grid size-10 place-items-center rounded-xl text-[var(--c-espresso)] transition-colors hover:bg-[var(--c-caramel)]/10 hover:text-[var(--c-teal)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-caramel)] focus-visible:ring-offset-2 lg:hidden"
+              aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-navigation"
+              onClick={() => setMenuOpen((open) => !open)}
             >
-              <MenuIcon size={22} />
+              {menuOpen ? (
+                <X size={22} aria-hidden="true" />
+              ) : (
+                <Menu size={22} aria-hidden="true" />
+              )}
             </button>
           </div>
-        </nav>
+        </div>
 
-        {/* Search bar */}
-        <AnimatePresence initial={false}>
-          {searchOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
-            >
-              <form
-                onSubmit={handleSearch}
-                className="mx-auto flex max-w-6xl gap-2 px-4 pb-3"
-              >
-                <input
-                  name="q"
-                  autoFocus
-                  placeholder="Chips, biscuit, chocolate, ice cream..."
-                  className="w-full rounded-full border border-[var(--c-espresso)]/20 bg-white/50 px-4 py-2 text-sm text-[var(--c-espresso)] outline-none placeholder:text-[var(--c-espresso)]/50 focus-visible:ring-2 focus-visible:ring-[var(--c-caramel)]"
-                />
-                <button
-                  type="submit"
-                  className="rounded-full bg-[var(--c-espresso)] px-4 text-sm font-bold text-[var(--c-cream)]"
-                >
-                  Search
-                </button>
-              </form>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
-
-      {/* ============ MOBILE DRAWER ============ */}
-      <AnimatePresence>
-        {drawerOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-50 bg-black/50 md:hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setDrawerOpen(false)}
-            />
-            <motion.aside
-              className="fixed right-0 top-0 z-50 flex h-full w-72 flex-col bg-[var(--c-cream)] p-5 text-[var(--c-espresso)] md:hidden"
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "tween", duration: 0.25 }}
-            >
-              <div className="mb-6 flex items-center justify-between">
-                <span className="text-lg font-extrabold text-[var(--c-espresso)]">
-                  School Canteen
-                </span>
-                <button
-                  onClick={() => setDrawerOpen(false)}
-                  aria-label="Close menu"
-                  className="rounded-full p-2 hover:bg-[var(--c-espresso)]/10"
-                >
-                  <X size={22} />
-                </button>
-              </div>
-
-              <ul className="flex flex-col gap-1">
-                {LINKS.map(({ href, label, icon: Icon }) => (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-3 font-semibold ${
-                        isActive(href)
-                          ? "bg-[var(--c-espresso)] text-[var(--c-cream)]"
-                          : "hover:bg-[var(--c-espresso)]/10"
-                      }`}
+        {menuOpen && (
+          <ul
+            id="mobile-navigation"
+            className="grid gap-1 border-t border-[var(--c-espresso)]/10 py-3 lg:hidden"
+          >
+            {user && (
+              <>
+                <li className="flex min-w-0 items-center gap-3 rounded-xl px-3 py-2">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[var(--c-teal)] text-sm font-extrabold uppercase text-[var(--c-paper)]">
+                    {(user.name || user.email || "U").charAt(0)}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-xs font-medium text-[var(--c-teal)]">
+                      Signed in as
+                    </span>
+                    <span
+                      className="block truncate text-sm font-bold text-[var(--c-espresso)]"
+                      title={user.name || user.email}
                     >
-                      <Icon size={20} /> {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-auto">
-                {user ? (
+                      {user.name || user.email}
+                    </span>
+                  </span>
+                </li>
+                <li>
                   <button
-                    onClick={() => toast.success("Logged out")}
-                    className="w-full rounded-xl bg-[var(--c-espresso)] py-3 font-bold text-[var(--c-cream)]"
+                    type="button"
+                    onClick={handleLogout}
+                    disabled={loggingOut}
+                    className={`flex w-full items-center gap-2 ${linkClass} text-left disabled:cursor-not-allowed disabled:opacity-60`}
                   >
-                    Logout
+                    <LogOut size={16} aria-hidden="true" />
+                    {loggingOut ? "Signing out..." : "Log out"}
                   </button>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="block w-full rounded-xl bg-[var(--c-espresso)] py-3 text-center font-bold text-[var(--c-cream)]"
-                  >
-                    Login
-                  </Link>
-                )}
-              </div>
-            </motion.aside>
-          </>
+                </li>
+              </>
+            )}
+            {navigationLinks.map(({ href, label }) => (
+              <li key={label}>
+                <Link
+                  href={href}
+                  className={`block ${linkClass}`}
+                  aria-current={
+                    (href === "/" && pathname === "/") ||
+                    (href === "/dashboard" && pathname.startsWith("/dashboard"))
+                      ? "page"
+                      : undefined
+                  }
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         )}
-      </AnimatePresence>
-
-      {/* ============ MOBILE BOTTOM NAV ============ */}
-    
-    </>
+      </nav>
+    </header>
   );
 }

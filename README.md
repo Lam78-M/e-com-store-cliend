@@ -18,6 +18,16 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
+## Admin registration
+
+The registration form currently allows choosing either the `user` or `admin`
+role. Admin sign-ups are sent to `/dashboard`; user sign-ups are sent to `/`.
+Authenticated users cannot change their role through profile updates.
+
+Because admin registration is open while this option is enabled, anyone can
+select Admin and gain admin access. Restrict or remove the Admin option before
+deploying the app publicly.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

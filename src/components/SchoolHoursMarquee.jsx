@@ -30,6 +30,7 @@ function HoursGroup({ duplicate = false }) {
 export default function SchoolHoursMarquee() {
   return (
     <section
+      id="school-hours"
       className={styles.announcement}
       aria-label="School hours and tiffin time"
     >

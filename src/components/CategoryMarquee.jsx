@@ -1,16 +1,15 @@
-import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Sparkles } from "lucide-react";
 import styles from "./CategoryMarquee.module.css";
 
 const CATEGORIES = [
-  { href: "/drinks", label: "Drinks", image: "/school_drinks.png" },
-  { href: "/biscuits", label: "Biscuits", image: "/school-buicuits.png" },
-  { href: "/fast-food", label: "Fast Food", image: "/schoo_fast_food.png" },
-  { href: "/chocolate", label: "Chocolate", image: "/school_chocolate.png" },
-  { href: "/snacks", label: "Snacks", image: "/school-canteen_items.png" },
-  { href: "/desserts", label: "Desserts", image: "/School_desert.png" },
-  { href: "/items", label: "School Supplies", image: "/school_stationary.png" },
+  { label: "Drinks", image: "/school_drinks.png" },
+  { label: "Biscuits", image: "/school-buicuits.png" },
+  { label: "Fast Food", image: "/schoo_fast_food.png" },
+  { label: "Chocolate", image: "/school_chocolate.png" },
+  { label: "Snacks", image: "/school-canteen_items.png" },
+  { label: "Desserts", image: "/School_desert.png" },
+  { label: "School Supplies", image: "/school_stationary.png" },
 ];
 
 function CategoryCards({ duplicate = false }) {
@@ -20,13 +19,9 @@ function CategoryCards({ duplicate = false }) {
       aria-hidden={duplicate ? "true" : undefined}
       aria-label={duplicate ? undefined : "Canteen categories and school supplies"}
     >
-      {CATEGORIES.map(({ href, label, image }) => (
-        <li key={href} className={styles.categoryItem}>
-          <Link
-            href={href}
-            className={styles.categoryCard}
-            tabIndex={duplicate ? -1 : undefined}
-          >
+      {CATEGORIES.map(({ label, image }) => (
+        <li key={label} className={styles.categoryItem}>
+          <div className={styles.categoryCard}>
             <Image
               src={image}
               alt={duplicate ? "" : `${label} at the school canteen`}
@@ -40,7 +35,7 @@ function CategoryCards({ duplicate = false }) {
                 <ArrowRight size={18} />
               </span>
             </span>
-          </Link>
+          </div>
         </li>
       ))}
     </ul>
@@ -50,6 +45,7 @@ function CategoryCards({ duplicate = false }) {
 export default function CategoryMarquee() {
   return (
     <section
+      id="categories"
       className="mb-20 overflow-hidden border-y-4 border-[var(--c-caramel)] bg-[var(--c-teal)] text-[var(--c-paper)] "
       aria-labelledby="category-marquee-title "
     >

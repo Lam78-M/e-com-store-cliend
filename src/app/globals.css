@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@heroui/styles"; 
 
 :root {
   --c-cream:    #E8E1D7; /* page background, navbar */
